@@ -81,7 +81,24 @@ class JsonHelper:
 
     def getSubArrayElement(self, key, data):
         subElemKey = key[:key.find(self.arrayOpener)]
-        index = int(key[key.find(self.arrayOpener) + 1:key.find(self.arrayCloser)])
+
+        k = key[key.find(self.arrayOpener) + 1:key.find(self.arrayCloser)]
+        if not k.isdigit(): # isdecimal() for py3
+            # k is of type: name=val
+            # val might be e.g. "Hadoop:service=Resource Manager (Stuff),name=RMNMInfo",
+            # which is a hell to parse, so we base64 en/decode val to make parsing easier.
+
+            # find index in data where "data[name] = base64.decode(val)":
+            n, v = k.split("=", 1)
+            v = base64.b64decode(v)
+            for i in range(len(data)):
+                if self.get(n, data[i]) == v:
+                    k = i
+                    break
+            if not isinstance(k, int): # did we find index of k?
+                return (None, 'not_found')
+
+        index = int(k)
         remainingKey = key[key.find(self.arrayCloser + self.separator) + 2:]
         if key.find(self.arrayCloser + self.separator) == -1:
             remainingKey = key[key.find(self.arrayCloser) + 1:]
