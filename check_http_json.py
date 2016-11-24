@@ -280,8 +280,23 @@ class JsonRuleProcessor:
 
 def parseArgs():
     parser = argparse.ArgumentParser(description=
-            'Nagios plugin which checks json values from a given endpoint against argument specified rules\
-            and determines the status and performance data for that service')
+        'Nagios plugin which checks json values from a given endpoint against argument specified rules\
+        and determines the status and performance data for that service',
+        epilog="""
+Examples:
+
+    ./check_http_json.py --host localhost --port 8088 --path jmx --warning "beans.(0).val,10:20"
+
+Will test if the json at http://localhost:8088/jmx has an element like  {beans:[{val: 15}]}  
+
+If you can't be sure of the location in the json of some value, you can search using (name=value), but this is somewhat limited, so the value part has to be base64 encoded.
+E.g. if you want to find the element in a list where "name" is equal to "java.lang:type=MemoryPool (raw),name=Metaspace" you have to encode the value part to:
+
+python -c "import base64; print(base64.b64encode('test'))" and get "amF2YS5sYW5nOnR5cGU9TWVtb3J5UG9vbCAocmF3KSxuYW1lPU1ldGFzcGFjZQ==".
+You can now query a unknown json tree using:
+
+    ./chech_http_json.py --host localhost --port 8088 --part jmx --warning "beans.(name=amF2YS5sYW5nOnR5cGU9TWVtb3J5UG9vbCAocmF3KSxuYW1lPU1ldGFzcGFjZQ==).someProp,RANGE"
+""")
 
     # parser.add_argument('-v', '--verbose', action='store_true', help='Verbose Output')
     parser.add_argument('-d', '--debug', action='store_true', help='Debug mode.')
@@ -294,7 +309,7 @@ def parseArgs():
     parser.add_argument('-D', '--data', dest='data', help='The http payload to send as a POST')
     parser.add_argument('-A', '--headers', dest='headers', help='The http headers in JSON format.')
     parser.add_argument('-f', '--field_separator', dest='separator',
-        help='Json Field separator, defaults to "." ; Select element in an array with "(" ")"')
+        help='Json Field separator, defaults to "." ; Select element in an array with "(" ")" ; Use "(" name = base64(val) ")" for finding keys matching a certain value.')
     parser.add_argument('-w', '--warning', dest='key_threshold_warning', nargs='*',
         help='Warning threshold for these values (key1[>alias],WarnRange key2[>alias],WarnRange). WarnRange is in the format [@]start:end, more information at nagios-plugins.org/doc/guidelines.html.')
     parser.add_argument('-c', '--critical', dest='key_threshold_critical', nargs='*',
