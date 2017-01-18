@@ -92,7 +92,7 @@ class JsonHelper:
             n, v = k.split("=", 1)
             v = base64.b64decode(v)
             for i in range(len(data)):
-                if self.get(n, data[i]) == v:
+                if str(self.get(n, data[i])) == str(v):
                     k = i
                     break
             if not isinstance(k, int): # did we find index of k?
