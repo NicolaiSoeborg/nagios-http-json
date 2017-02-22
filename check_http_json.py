@@ -15,8 +15,6 @@ from pprint import pprint
 from urllib2 import HTTPError
 from urllib2 import URLError
 
-# TEST = False
-
 
 OK_CODE = 0
 WARNING_CODE = 1
@@ -198,19 +196,19 @@ class JsonRuleProcessor:
                 end = vals[1]
         if(start == '~'):
             if (invert and self.helper.lte(key, end)):
-                failure += " Value for key %s was less than or equal to %s." % (alias, end)
+                failure += " Value for key %s (%s) was less than or equal to %s." % (alias, self.helper.get(key), end)
             elif (not invert and self.helper.gt(key, end)):
-                failure += " Value for key %s was greater than %s." % (alias, end)
+                failure += " Value for key %s (%s) was greater than %s." % (alias, self.helper.get(key), end)
         elif(end == 'infinity'):
             if (invert and self.helper.gte(key, start)):
-                failure += " Value for key %s was greater than or equal to %s." % (alias, start)
+                failure += " Value for key %s (%s) was greater than or equal to %s." % (alias, self.helper.get(key), start)
             elif (not invert and self.helper.lt(key, start)):
-                failure += " Value for key %s was less than %s." % (alias, start)
+                failure += " Value for key %s (%s) was less than %s." % (alias, self.helper.get(key), start)
         else:
             if (invert and self.helper.gte(key, start) and self.helper.lte(key, end)):
-                failure += " Value for key %s was inside the range %s:%s." % (alias, start, end)
+                failure += " Value for key %s (%s) was inside the range %s:%s." % (alias, self.helper.get(key), start, end)
             elif (not invert and (self.helper.lt(key, start) or self.helper.gt(key, end))):
-                failure += " Value for key %s was outside the range %s:%s." % (alias, start, end)
+                failure += " Value for key %s (%s) was outside the range %s:%s." % (alias, self.helper.get(key), start, end)
         return failure
 
     def checkThresholds(self, threshold_list):
